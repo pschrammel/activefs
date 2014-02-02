@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+
+require 'pathname'
+root=Pathname.new(File.expand_path(File.dirname(__FILE__)+'/..'))
+$: << root.join('lib')
+require('activefs')
+
+cmd=ARGV[0]
+
+case cmd
+  when "index_list"
+     Activefs::Index.new(ARGV[1]).open.each do |entry|
+        p entry
+     end
+  when "unpack"
+     index=Activefs::Index.new(ARGV[1]).open
+     entry=index.at(ARGV[3])
+     packfile0=Activefs::Packfile.new(ARGV[2], 0)
+     content=packfile0.get(entry)
+     puts content
+  when "unpack_p"
+     index=Activefs::Index.new(ARGV[1]).open
+     entry=index.at(ARGV[3])
+     packfile0=Activefs::Packfile.new(ARGV[2], 0)
+     content=packfile0.get(entry)
+     p content
+end
+ 
