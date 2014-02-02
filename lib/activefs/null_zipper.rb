@@ -1,4 +1,4 @@
-module ActiveFs
+module Activefs
   class NullZipper
     def self.decompress(content)
       content

@@ -8,6 +8,7 @@ require 'activefs/index'
 require 'activefs/snapshots'
 require 'activefs/metadata'
 require 'activefs/packfile'
+require 'activefs/null_zipper'
 
 module Activefs
   REPO_VERSION=1

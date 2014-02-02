@@ -65,7 +65,7 @@ module Activefs
           raise "lzma zipper not implemented"
         when FLAG_ZIPMASK
           raise "zip zipp not implemented"
-        when 0
+        when FLAG_UNCOMPRESSED
           NullZipper
       end
     end
@@ -118,7 +118,7 @@ module Activefs
           "L"
         when FLAG_ZIPMASK
           "Z"
-        when 0
+        when FLAG_UNCOMPRESSED
           "U"
       end
     end
