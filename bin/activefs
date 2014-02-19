@@ -9,20 +9,36 @@ cmd=ARGV[0]
 
 case cmd
   when "index_list"
-     Activefs::Index.new(ARGV[1]).open.each do |entry|
-        p entry
-     end
+    Activefs::Index.new(ARGV[1]).open.each do |entry|
+      p entry
+    end
   when "unpack"
-     index=Activefs::Index.new(ARGV[1]).open
-     entry=index.at(ARGV[3])
-     packfile0=Activefs::Packfile.new(ARGV[2], 0)
-     content=packfile0.get(entry)
-     puts content
+    index=Activefs::Index.new(ARGV[1]).open
+    entry=index.at(ARGV[3])
+    packfile0=Activefs::Packfile.new(ARGV[2], 0)
+    content=packfile0.get(entry)
+    puts content
   when "unpack_p"
-     index=Activefs::Index.new(ARGV[1]).open
-     entry=index.at(ARGV[3])
-     packfile0=Activefs::Packfile.new(ARGV[2], 0)
-     content=packfile0.get(entry)
-     p content
+    index=Activefs::Index.new(ARGV[1]).open
+    entry=index.at(ARGV[3])
+    packfile=Activefs::Packfile.new(ARGV[2], entry.packfile)
+    p entry
+    puts "EMPTY!" if entry.objectinfo.empty?
+    content=case
+              when entry.objectinfo.tree?
+                content=packfile.get(entry)
+                Activefs::Tree.from_binary(content)
+              when entry.objectinfo.blob?
+                packfile.get(entry)
+              when entry.objectinfo.commit?
+                Activefs::Commit.from_binary(packfile.get(entry))
+              when entry.objectinfo.largeblob?
+                Activefs::Largeblob.from_binary(packfile.get(entry))
+              else
+                "unsupported"
+            end
+
+
+    p content
 end
  

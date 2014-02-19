@@ -33,6 +33,30 @@ module Activefs
 
     attr_reader :type, :flags, :payload_size, :hash, :zipalgo
 
+    def tree?
+      @type==TYPE_TREE
+    end
+
+    def blob?
+      @type==TYPE_BLOB
+    end
+
+    def largeblob?
+      @type==TYPE_LARGE_BLOB
+    end
+
+    def commit?
+      @type==TYPE_COMMIT
+    end
+
+    def purged?
+      @type==TYPE_PURGED
+    end
+
+    def empty?
+      @hash.empty?
+    end
+
     def self.from_binary(str)
       new(Util::Objecthash.from_binary(str.byteslice(TYPE__SIZE.. TYPE__SIZE+Util::Objecthash::SIZE-1)),
           str_to_type(str.byteslice(0..TYPE__SIZE-1)),

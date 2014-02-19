@@ -9,6 +9,11 @@ require 'activefs/snapshots'
 require 'activefs/metadata'
 require 'activefs/packfile'
 require 'activefs/null_zipper'
+require 'activefs/rkchunker'
+
+require 'activefs/tree'
+require 'activefs/commit'
+require 'activefs/largeblob'
 
 module Activefs
   REPO_VERSION=1
