@@ -65,8 +65,9 @@ module Activefs
       end
     end
 
+    #@param Util::Objecthash hash can also be a string of a hash
     def at(hash)
-      @entries[hash]
+      @entries[hash.to_s]
     end
 
     def check(hash)

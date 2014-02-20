@@ -53,11 +53,10 @@ module Activefs
       @open=false
     end
 
-
     def heads
       _heads={}
       Dir.glob("#{@base_path.join(PATH_HEADS)}/*").each do |path_name|
-        hash=File.read(path_name)
+        hash=Util::Objecthash.new(File.read(path_name))
         name=File.basename(path_name)
         _heads[name]=hash
       end
@@ -127,8 +126,32 @@ module Activefs
     #  LocalObject.new(packfile, index_entry)
     #end
 
-    def get(entry)
-      packfile(entry).get(entry)
+    #@param Util::Objecthash hash
+    #return the object of an index entry (Tree, Commit, Largeblob, content)
+    def get(hash)
+      entry=index.at(hash)
+      return nil if entry.objectinfo.empty?
+      content=packfile(entry).get(entry)
+      case
+        when entry.objectinfo.blob?
+                  content
+        when entry.objectinfo.tree?
+          Activefs::Tree.from_binary(content)
+        when entry.objectinfo.commit?
+          Activefs::Commit.from_binary(content)
+        when entry.objectinfo.largeblob?
+          Activefs::Largeblob.from_binary(content)
+        else
+          raise "unsupported"
+      end
+    end
+
+    #returns the entries of the path
+    def ls(path='')
+      commit_hash=head('default')
+      commit=get(commit_hash)
+      root=get(commit.tree_hash)
+      root.entries
     end
 
     private

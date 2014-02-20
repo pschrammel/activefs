@@ -5,47 +5,44 @@ root=Pathname.new(File.expand_path(File.dirname(__FILE__)+'/..'))
 $: << root.join('lib')
 require('activefs')
 
-cmd=ARGV[0]
 
+def oh(hash_str)
+  Activefs::Util::Objecthash.new(hash_str)
+end
+
+cmd=ARGV[0]
 case cmd
   when "index_list"
     repo=Activefs::LocalRepo.open(ARGV[1])
     repo.index.each do |entry|
       p entry
     end
-  when "heads"
+  when "heads" #
     repo=Activefs::LocalRepo.open(ARGV[1])
     repo.heads.each do |name, hash|
       puts "#{name} : #{hash}"
     end
-  when "head"
+  when "head" #name
     repo=Activefs::LocalRepo.open(ARGV[1])
     puts repo.head(ARGV[2])
-  when "unpack"
+  when "unpack" #hash
     repo=Activefs::LocalRepo.open(ARGV[1])
-    entry=repo.index.at(ARGV[2])
-    content=repo.get(entry)
+    entry=repo.index.at(oh(ARGV[2]))
+    content=repo.get(oh(ARGV[2]))
+
     puts content
-  when "unpack_p"
+  when "unpack_p" #hash
     repo=Activefs::LocalRepo.open(ARGV[1])
-    entry=repo.index.at(ARGV[2])
-    content=repo.get(entry)
+    entry=repo.index.at(oh(ARGV[2]))
+
     p entry
-    puts "EMPTY!" if entry.objectinfo.empty?
-    out=case
-              when entry.objectinfo.tree?
-                Activefs::Tree.from_binary(content)
-              when entry.objectinfo.blob?
-                content
-              when entry.objectinfo.commit?
-                Activefs::Commit.from_binary(content)
-              when entry.objectinfo.largeblob?
-                Activefs::Largeblob.from_binary(content)
-              else
-                "unsupported"
-            end
+    p repo.get(oh(ARGV[2]))
 
-
-    p out
+  when "ls" # path_name
+    repo=Activefs::LocalRepo.open(ARGV[1])
+    path=ARGV[2]
+    repo.ls(path).each do |entry|
+      puts entry.path
+    end
 end
  

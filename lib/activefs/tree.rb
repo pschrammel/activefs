@@ -24,7 +24,7 @@ module Activefs
       def []=(name, value)
         @atts[name]=value
       end
-    end
+    end #TreeEntry
 
     def initialize(entries=[])
       @entries=entries
