@@ -134,7 +134,7 @@ module Activefs
       content=packfile(entry).get(entry)
       case
         when entry.objectinfo.blob?
-                  content
+          content
         when entry.objectinfo.tree?
           Activefs::Tree.from_binary(content)
         when entry.objectinfo.commit?
@@ -148,10 +148,16 @@ module Activefs
 
     #returns the entries of the path
     def ls(path='')
+
       commit_hash=head('default')
       commit=get(commit_hash)
-      root=get(commit.tree_hash)
-      root.entries
+      tree=get(commit.tree_hash)
+
+      path.split('/').each do |name|
+        tree=get(tree[name].hash)
+      end
+
+      tree.entries
     end
 
     private

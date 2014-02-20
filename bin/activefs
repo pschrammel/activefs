@@ -40,7 +40,7 @@ case cmd
 
   when "ls" # path_name
     repo=Activefs::LocalRepo.open(ARGV[1])
-    path=ARGV[2]
+    path=ARGV[2] || ''
     repo.ls(path).each do |entry|
       puts entry.path
     end

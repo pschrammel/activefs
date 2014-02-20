@@ -27,10 +27,16 @@ module Activefs
     end #TreeEntry
 
     def initialize(entries=[])
-      @entries=entries
+      @entries=entries.inject({}) do |hash,entry| hash[entry.path]=entry;  hash end
     end
 
-    attr_reader :entries
+    def entries
+      @entries.values
+    end
+
+    def [](name)
+      @entries[name]
+    end
 
     def inspect
       @entries.map(&:inspect).join("\n")
