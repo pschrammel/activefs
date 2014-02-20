@@ -16,9 +16,10 @@ require 'activefs/commit'
 require 'activefs/largeblob'
 
 module Activefs
-  REPO_VERSION=1
+  REPO_VERSION="ORI1.1"
   PATH_VERSION="version"
   PATH_ID='id'
   PATH_INDEX='index'
   PATH_SNAPSHOTS='snapshots'
+  PATH_HEADS='refs/heads'
 end

@@ -8,15 +8,20 @@ module Activefs
     #this creates a repo
     #TODO: bare or not to bare (we don't care)
     def self.create(base_path, uuid=nil)
-      ['tmp', 'objs', 'refs/heads', 'refs/remotes'].each do |dir|
+      ['tmp', 'objs', PATH_HEADS, 'refs/remotes'].each do |dir|
         FileUtils.mkdir_p(base_path.join(dir))
       end
       File.open(base_path.join('HEAD'), "w") do |fd|
         fd.write("@default")
       end
-      File.open(base_path.join('refs/heads/default'), 'w') do |fd|
+      File.open(base_path.join(PATH_HEADS, 'default'), 'w') do |fd|
         fd.write Activefs::Repo::EMPTY_COMMIT
       end
+
+      File.open(base_path.join(PATH_INDEX), 'w') do |fd|
+        #fd.write Activefs::Repo::EMPTY_COMMIT
+      end
+
 
       uuid||=UUID.generate
       File.open(base_path.join(PATH_ID), 'w') do |fd|
@@ -30,6 +35,7 @@ module Activefs
       new(base_path)
     end
 
+
     # create
 
     def self.open(base_path)
@@ -39,11 +45,26 @@ module Activefs
     end
 
     attr_reader :base_path
+
     def initialize(base_path)
       @base_path=Pathname(base_path)
       @index=nil
       raise "Empty path" unless base_path || base_path.empty?
       @open=false
+    end
+
+    def heads
+      _heads={}
+      Dir.glob("#{@base_path.join(PATH_HEADS)}/*").each do |path_name|
+        hash=File.read(path_name)
+        name=File.basename(path_name)
+        _heads[name]=hash
+      end
+      _heads
+    end
+
+    def head(name)
+      heads[name.to_s]
     end
 
     def open?
@@ -62,7 +83,7 @@ module Activefs
       check_version
       @index=Index.open(@base_path.join(PATH_INDEX))
       #TODO: repair index if broken
-      @snapshots=Snapshot.open(@base_path.join(PATH_SNAPSHOTS))
+      #@snapshots=Snapshot.open(@base_path.join(PATH_SNAPSHOTS))
       #metadata.open
       #vars.open
       #packfiles.reset
@@ -107,8 +128,9 @@ module Activefs
 
     private
     attr_reader :index
+
     def check_version
-      raise "wrong version" unless File.read(base_path.join(PATH_VERSION)) == REPO_VERSION.to_s
+      raise "wrong version" unless File.read(base_path.join(PATH_VERSION)) == REPO_VERSION
     end
   end
 end

@@ -12,6 +12,14 @@ case cmd
     Activefs::Index.new(ARGV[1]).open.each do |entry|
       p entry
     end
+  when "heads"
+    repo=Activefs::LocalRepo.open(ARGV[1])
+    repo.heads.each do |name,hash|
+      puts "#{name} : #{hash}"
+    end
+  when "head"
+    repo=Activefs::LocalRepo.open(ARGV[2])
+    puts repo.head(ARGV[1])
   when "unpack"
     index=Activefs::Index.new(ARGV[1]).open
     entry=index.at(ARGV[3])
