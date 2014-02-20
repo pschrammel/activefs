@@ -134,7 +134,7 @@ module Activefs
       content=packfile(entry).get(entry)
       case
         when entry.objectinfo.blob?
-          content
+          Activefs::Blob.from_binary(content)
         when entry.objectinfo.tree?
           Activefs::Tree.from_binary(content)
         when entry.objectinfo.commit?
@@ -151,10 +151,12 @@ module Activefs
 
       commit_hash=head('default')
       commit=get(commit_hash)
-      tree=get(commit.tree_hash)
+      tree=get(commit.tree_hash) #root
 
       path.split('/').each do |name|
         tree=get(tree[name].hash)
+        raise "Not tree #{path}:#{name}" unless tree.tree?
+
       end
 
       tree.entries

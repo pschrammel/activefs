@@ -1,5 +1,10 @@
 module Activefs
   class Tree
+    include Util::TypeTest
+    def tree?
+      true
+    end
+
     class TreeEntry
       def initialize(type)
         @type=type #:tree,:blob,:lgbl

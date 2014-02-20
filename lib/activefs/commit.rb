@@ -1,13 +1,19 @@
 module Activefs
   class Commit
+    include Util::TypeTest
+
+    def commit?
+      true
+    end
+
     def initialize(atts={})
-      atts.each do |key,value|
-        self.send("#{key}=",value)
+      atts.each do |key, value|
+        self.send("#{key}=", value)
       end
     end
 
-    attr_accessor :tree_hash, :snapshot_name, :version, :user, :message, :signature, :graft_repo ,
-              :graft_path, :graft_commit_id, :date,:parent1_hash , :parent2_hash
+    attr_accessor :tree_hash, :snapshot_name, :version, :user, :message, :signature, :graft_repo,
+                  :graft_path, :graft_commit_id, :date, :parent1_hash, :parent2_hash
 
     def inspect
       "COMMIT: V#{version}:#{tree_hash} #{date} S:#{snapshot_name} U:#{user} '#{message}' #{signature} G:#{graft_repo} #{graft_path} #{graft_commit_id} P1:#{parent1_hash} P2:#{parent2_hash}"
@@ -81,8 +87,8 @@ module Activefs
       ptr +=message.size+3
 
       new(:tree_hash => tree_hash,
-          :snapshot_name=>snapshot_name,
-          :version =>version,
+          :snapshot_name => snapshot_name,
+          :version => version,
           :user => user,
           :message => message,
           :signature => signature,

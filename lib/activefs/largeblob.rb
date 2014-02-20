@@ -1,15 +1,23 @@
 module Activefs
   class Largeblob
     class LargeblobEntry
-      def initialize(offset,hash,size)
+      def initialize(offset, hash, size)
         @offset=offset
         @hash=hash
         @size=size
       end
+
       attr_reader :offset, :hash, :size
+
       def inspect
         "#{offset} #{size} #{hash}"
       end
+    end
+
+    include Util::TypeTest
+
+    def large_blob?
+      true
     end
 
     def initialize(atts={})
@@ -21,7 +29,7 @@ module Activefs
     attr_accessor :hash, :parts
 
     def inspect
-      "LARGEBLOB: #{hash}\n#{parts.map{|part| part.inspect}.join("\n")}"
+      "LARGEBLOB: #{hash}\n#{parts.map { |part| part.inspect }.join("\n")}"
     end
 
     def self.from_binary(input)
