@@ -1,6 +1,7 @@
 module Activefs
   class Tree
     include Util::TypeTest
+
     def tree?
       true
     end
@@ -18,6 +19,10 @@ module Activefs
         @type == :lgbl
       end
 
+      def tree?
+        @type==:tree
+      end
+
       def inspect
         "TREE_ENTRY: #{@type} #{@hash} #{@path} #{@atts.inspect}"
       end
@@ -29,10 +34,68 @@ module Activefs
       def []=(name, value)
         @atts[name]=value
       end
+
+      def group
+        self['Sgroup']
+      end
+
+      def user
+        self['Suser']
+      end
+
+      def link?
+        false #TODO
+      end
+
+      def size
+        self['Ssize']
+      end
+
+      def perms
+        self['Sperms']
+      end
+
+      def ur?
+        perms & 256 != 0
+      end
+
+      def uw?
+        perms & 128 != 0
+      end
+
+      def ux?
+        perms & 64 != 0
+      end
+
+      def gr?
+        perms & 32 != 0
+      end
+
+      def gw?
+        perms & 16 != 0
+      end
+
+      def gx?
+        perms & 8 != 0
+      end
+
+      def or?
+        perms & 4 != 0
+      end
+
+      def ow?
+        perms & 2 != 0
+      end
+
+      def ox?
+        perms & 1 != 0
+      end
     end #TreeEntry
 
     def initialize(entries=[])
-      @entries=entries.inject({}) do |hash,entry| hash[entry.path]=entry;  hash end
+      @entries=entries.inject({}) do |hash, entry|
+        hash[entry.path]=entry; hash
+      end
     end
 
     def entries
@@ -88,6 +151,20 @@ module Activefs
           ptr += name.size + 3
           value=read_pstr(input[ptr..-1])
           ptr += value.size + 3
+          value=case name
+                  when 'Ssize'
+                    value.unpack('Q').first
+                  when 'Slink'
+                    value.unpack('C').first
+                  when 'Sperms'
+                    value.unpack('L<').first #& 16777215
+                  when 'Smtime'
+                    value.unpack('Q').first
+                  when 'Sctime'
+                    value.unpack('Q').first
+                  else
+                    value
+                end
           entry[name]=value
         end
         entries << entry

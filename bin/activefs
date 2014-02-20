@@ -5,7 +5,16 @@ root=Pathname.new(File.expand_path(File.dirname(__FILE__)+'/..'))
 $: << root.join('lib')
 require('activefs')
 
-
+def perm(bool,type)
+  bool ? type : '-'
+end
+def perms_s(entry)
+  str=entry.tree? ? 'd' : '-'
+  %w(ur uw ux gr gw gx or ow ox).each do |test|
+    str << perm(entry.send("#{test}?"), test[1])
+  end
+  str
+end
 def oh(hash_str)
   Activefs::Util::Objecthash.new(hash_str)
 end
@@ -42,7 +51,7 @@ case cmd
     repo=Activefs::LocalRepo.open(ARGV[1])
     path=ARGV[2] || ''
     repo.ls(path).each do |entry|
-      puts entry.path
+      puts "#{perms_s(entry)} #{entry.user} #{entry.group} #{entry.size} #{entry.path}"
     end
 end
  
