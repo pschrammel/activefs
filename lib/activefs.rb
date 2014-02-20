@@ -22,4 +22,5 @@ module Activefs
   PATH_INDEX='index'
   PATH_SNAPSHOTS='snapshots'
   PATH_HEADS='refs/heads'
+  PATH_OBJS='objs'
 end

@@ -44,7 +44,7 @@ module Activefs
       repo
     end
 
-    attr_reader :base_path
+    attr_reader :base_path, :index
 
     def initialize(base_path)
       @base_path=Pathname(base_path)
@@ -52,6 +52,7 @@ module Activefs
       raise "Empty path" unless base_path || base_path.empty?
       @open=false
     end
+
 
     def heads
       _heads={}
@@ -114,20 +115,27 @@ module Activefs
       @cache_remote_objects=cache
     end
 
-    def has_remote?
-      lock(remote_lock)
-      !@remote_repo.nil?
-    end
+    #def has_remote?
+    #  lock(remote_lock)
+    #  !@remote_repo.nil?
+    #end
 
-    def object(objecthash)
-      #TODO transaction
-      index_entry=index.at(objecthash)
-      packfile=packfiles.for_index_entry(index_entry.packfile)
-      LocalObject.new(packfile, index_entry)
+    #def object(objecthash)
+    #  #TODO transaction
+    #  index_entry=index.at(objecthash)
+    #  packfile=packfiles.for_index_entry(index_entry.packfile)
+    #  LocalObject.new(packfile, index_entry)
+    #end
+
+    def get(entry)
+      packfile(entry).get(entry)
     end
 
     private
-    attr_reader :index
+
+    def packfile(entry)
+      Packfile.new(@base_path.join(PATH_OBJS, "pack#{entry.packfile}.pak"), entry.packfile)
+    end
 
     def check_version
       raise "wrong version" unless File.read(base_path.join(PATH_VERSION)) == REPO_VERSION
