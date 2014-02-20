@@ -28,7 +28,7 @@ module Activefs
       hash=0
       off=0
       phase = 1 #there are two phases 1. hashing the first min bytes
-                     #                     2. finding the best chunk or max bytes
+                #                     2. finding the best chunk or max bytes
 
       the_chunk=io.read(@hashlen)
       return unless the_chunk
@@ -42,33 +42,52 @@ module Activefs
 
       chunk_off=off
       window=the_chunk.bytes #a sliding window of the last @hashlen bytes
-
+      digest=Digest::SHA2.new
+      digest << the_chunk
       #go the next bytes go from byte 32 -
       io.each_byte do |byte| #integer!
-        the_chunk << byte
         window << byte
+
         window_byte=window.shift
-        #original:
-        #hash= ((((hash-@lut[the_chunk.getbyte(chunk_off-@hashlen)]) & @bit64) * @b) + byte) & @bit64
+
         hash= ((((hash-window_byte) & @bit64) * @b) + byte) & @bit64
-        puts "#{off} #{chunk_off} #{hash} #{window_byte} #{byte} #{phase} #{hash % @target}"
+        #puts "#{off} #{chunk_off} #{hash} #{window_byte} #{byte} #{phase} #{hash % @target} #{digest}"
 
         case
           when io.eof? # fire chunk if eof
-            yield :eof, off, hash, the_chunk
-          when phase == 1 && (chunk_off == @min)
+            the_chunk << byte
+            digest << [byte].pack("C")
+
+            yield :eof, off, hash, the_chunk, digest.to_s
+          when phase == 1 && (chunk_off == @min) #entering compare if min size is reached
+            the_chunk << byte
+            digest << [byte].pack("C")
+
             phase = 2
-          when phase == 2 && (hash % @target == 1)
-            yield :chunked, off, hash, the_chunk
+          when phase == 2 && (hash % @target == 1) #match? then we have a chunk
+            yield :chunked, off, hash, the_chunk, digest.to_s
+
             phase = 1
             chunk_off = -1
             the_chunk=''
-            hash= ((((hash-window_byte) & @bit64) * @b) + byte) & @bit64
-          when phase == 2 && (chunk_off == @max)
-            yield :max, off, hash, the_chunk
+            digest=Digest::SHA2.new
+
+            the_chunk << byte
+            digest << [byte].pack("C")
+
+            hash= ((((hash-window_byte) & @bit64) * @b) + byte) & @bit64 #the original code does a dubble hash on the edges
+          when phase == 2 && (chunk_off == @max) #no match but max size reached
+            yield :max, off, hash, the_chunk, digest.to_s
             phase = 1
             chunk_off = -1
             the_chunk=''
+            digest=Digest::SHA2.new
+
+            the_chunk << byte
+            digest << [byte].pack("C")
+          else
+            the_chunk << byte
+            digest << [byte].pack("C")
         end
 
 
