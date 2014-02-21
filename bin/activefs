@@ -5,6 +5,9 @@ root=Pathname.new(File.expand_path(File.dirname(__FILE__)+'/..'))
 $: << root.join('lib')
 require('activefs')
 
+def time(t)
+ t.strftime("%Y %b %d %H:%M")
+end
 def perm(bool,type)
   bool ? type : '-'
 end
@@ -51,7 +54,7 @@ case cmd
     repo=Activefs::LocalRepo.open(ARGV[1])
     path=ARGV[2] || ''
     repo.ls(path).each do |entry|
-      puts "#{perms_s(entry)} #{entry.user} #{entry.group} #{entry.size} #{entry.path}"
+      puts "#{perms_s(entry)} #{entry.user} #{entry.group} #{entry.size} #{time(entry.mtime)} #{entry.path}"
     end
 end
  

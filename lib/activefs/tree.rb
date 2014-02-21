@@ -35,6 +35,14 @@ module Activefs
         @atts[name]=value
       end
 
+      def mtime
+        self['Smtime']
+      end
+
+      def ctime
+        self['Smtime']
+      end
+
       def group
         self['Sgroup']
       end
@@ -159,9 +167,9 @@ module Activefs
                   when 'Sperms'
                     value.unpack('L<').first #& 16777215
                   when 'Smtime'
-                    value.unpack('Q').first
+                    Time.at(value.unpack('Q').first)
                   when 'Sctime'
-                    value.unpack('Q').first
+                    Time.at(value.unpack('Q').first)
                   else
                     value
                 end
