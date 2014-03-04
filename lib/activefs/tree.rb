@@ -15,6 +15,10 @@ module Activefs
       attr_accessor :large_hash, :hash, :path
       attr_reader :lgbl
 
+      def index_hash
+        large_blob? ? large_hash : hash
+      end
+
       def large_blob?
         @type == :lgbl
       end

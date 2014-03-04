@@ -39,9 +39,7 @@ case cmd
     puts repo.head(ARGV[2])
   when "unpack" #hash
     repo=Activefs::LocalRepo.open(ARGV[1])
-    entry=repo.index.at(oh(ARGV[2]))
     content=repo.get(oh(ARGV[2]))
-
     puts content
   when "unpack_p" #hash
     repo=Activefs::LocalRepo.open(ARGV[1])
@@ -53,8 +51,17 @@ case cmd
   when "ls" # path_name
     repo=Activefs::LocalRepo.open(ARGV[1])
     path=ARGV[2] || ''
-    repo.ls(path).each do |entry|
+    repo.each(path).each do |entry|
       puts "#{perms_s(entry)} #{entry.user} #{entry.group} #{entry.size} #{time(entry.mtime)} #{entry.path}"
     end
+
+  when "checkout"
+
+    repo=Activefs::LocalRepo.open(ARGV[1])
+    path=File.join(Dir.pwd,ARGV[2]) || raise("path argument missing")
+    Activefs::Cmd::Checkout.run(repo, path)
+
+  else
+    puts "no command given"
 end
  

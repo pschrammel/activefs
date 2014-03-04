@@ -14,6 +14,8 @@ module Activefs
       new(content)
     end
 
+    attr_reader :content
+
     def to_s
       @content
     end

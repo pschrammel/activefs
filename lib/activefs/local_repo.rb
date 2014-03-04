@@ -129,17 +129,22 @@ module Activefs
     #@param Util::Objecthash hash
     #return the object of an index entry (Tree, Commit, Largeblob, content)
     def get(hash)
-      entry=index.at(hash)
-      return nil if entry.objectinfo.empty?
-      content=packfile(entry).get(entry)
+      idx_entry=index.at(hash)
+      get_object(idx_entry)
+    end
+
+    #returns a Tree/Blob/Largeblob/Commit object
+    def get_object(idx_entry)
+      return nil if idx_entry.objectinfo.empty?
+      content=packfile(idx_entry).get(idx_entry)
       case
-        when entry.objectinfo.blob?
+        when idx_entry.objectinfo.blob?
           Activefs::Blob.from_binary(content)
-        when entry.objectinfo.tree?
+        when idx_entry.objectinfo.tree?
           Activefs::Tree.from_binary(content)
-        when entry.objectinfo.commit?
+        when idx_entry.objectinfo.commit?
           Activefs::Commit.from_binary(content)
-        when entry.objectinfo.largeblob?
+        when idx_entry.objectinfo.largeblob?
           Activefs::Largeblob.from_binary(content)
         else
           raise "unsupported"
@@ -147,20 +152,25 @@ module Activefs
     end
 
     #returns the entries of the path
-    def ls(path='')
+    def each(path='', recursive=false, head_name='default', &block)
+      tree=root(head_name)
 
-      commit_hash=head('default')
-      commit=get(commit_hash)
-      tree=get(commit.tree_hash) #root
-
+      #get down to the given path
       path.split('/').each do |name|
         tree=get(tree[name].hash)
         raise "Not tree #{path}:#{name}" unless tree.tree?
-
       end
 
-      tree.entries
+
+      each_entry(path, tree, recursive, [], &block)
     end
+
+    def root(head_name='default')
+      commit_hash=head(head_name)
+      commit=get(commit_hash)
+      get(commit.tree_hash)
+    end
+
 
     private
 
@@ -171,5 +181,20 @@ module Activefs
     def check_version
       raise "wrong version" unless File.read(base_path.join(PATH_VERSION)) == REPO_VERSION
     end
+
+    def each_entry(path, tree, recursive, entries, &block)
+      tree.entries.each do |entry|
+        if block_given?
+          yield path, entry
+        else
+          entries << entry
+        end
+        if recursive && entry.tree?
+          each_entry(path+'/'+entry.path, get(entry.hash), true, entries, &block)
+        end
+      end
+      entries
+    end
+
   end
 end

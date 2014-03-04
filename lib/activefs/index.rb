@@ -66,6 +66,7 @@ module Activefs
     end
 
     #@param Util::Objecthash hash can also be a string of a hash
+    #@return IndexEntry
     def at(hash)
       @entries[hash.to_s]
     end

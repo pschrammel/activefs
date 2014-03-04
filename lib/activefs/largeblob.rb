@@ -10,7 +10,7 @@ module Activefs
       attr_reader :offset, :hash, :size
 
       def inspect
-        "#{offset} #{size} #{hash}"
+        "LGBL ENTRY: #{offset} #{size} #{hash}"
       end
     end
 
@@ -18,6 +18,14 @@ module Activefs
 
     def large_blob?
       true
+    end
+
+    def content(repo)
+      c=''
+      parts.each do  |part|
+        c << repo.get(part.hash).content
+      end
+      c
     end
 
     def initialize(atts={})

@@ -1,4 +1,5 @@
 require 'fastlz'
+require 'fileutils'
 
 require 'activefs/util/type_test'
 
@@ -18,6 +19,9 @@ require 'activefs/tree'
 require 'activefs/commit'
 require 'activefs/largeblob'
 require 'activefs/blob'
+
+require 'activefs/cmd/base'
+require 'activefs/cmd/checkout'
 
 module Activefs
   REPO_VERSION="ORI1.1"
