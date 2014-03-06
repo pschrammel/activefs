@@ -5,7 +5,7 @@ module Activefs
       def run(repo, dst_path)
 
         repo.each('', true) do |path, tree_entry|
-          dst_filename=File.join(dst_path, path, tree_entry.path)
+          dst_filename=File.join(dst_path, path)
           #TODO: if the destination already exists delete it
           #TODO: cleanup other files/dirs if untouched
           #next if entry.purged?

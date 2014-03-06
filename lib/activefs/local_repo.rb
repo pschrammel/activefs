@@ -47,7 +47,7 @@ module Activefs
     attr_reader :base_path, :index
 
     def initialize(base_path)
-      @base_path=Pathname(base_path)
+      @base_path=Pathname(File.expand_path(base_path))
       @index=nil
       raise "Empty path" unless base_path || base_path.empty?
       @open=false
@@ -151,7 +151,7 @@ module Activefs
       end
     end
 
-    #returns the entries of the path
+    #@return Array of Activefs::IndexEntry
     def each(path='', recursive=false, head_name='default', &block)
       tree=root(head_name)
 
@@ -184,13 +184,15 @@ module Activefs
 
     def each_entry(path, tree, recursive, entries, &block)
       tree.entries.each do |entry|
+        abs_path=(path.empty? ? entry.path : File.join(path,entry.path))
+
         if block_given?
-          yield path, entry
+          yield abs_path, entry
         else
-          entries << entry
+          entries << [abs_path,entry]
         end
         if recursive && entry.tree?
-          each_entry(path+'/'+entry.path, get(entry.hash), true, entries, &block)
+          each_entry(abs_path, get(entry.hash), true, entries, &block)
         end
       end
       entries

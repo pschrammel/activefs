@@ -6,11 +6,13 @@ $: << root.join('lib')
 require('activefs')
 
 def time(t)
- t.strftime("%Y %b %d %H:%M")
+  t.strftime("%Y %b %d %H:%M")
 end
-def perm(bool,type)
+
+def perm(bool, type)
   bool ? type : '-'
 end
+
 def perms_s(entry)
   str=entry.tree? ? 'd' : '-'
   %w(ur uw ux gr gw gx or ow ox).each do |test|
@@ -18,6 +20,7 @@ def perms_s(entry)
   end
   str
 end
+
 def oh(hash_str)
   Activefs::Util::Objecthash.new(hash_str)
 end
@@ -51,16 +54,20 @@ case cmd
   when "ls" # path_name
     repo=Activefs::LocalRepo.open(ARGV[1])
     path=ARGV[2] || ''
-    repo.each(path).each do |entry|
+    repo.each(path).each do |abs_path, entry|
       puts "#{perms_s(entry)} #{entry.user} #{entry.group} #{entry.size} #{time(entry.mtime)} #{entry.path}"
     end
 
   when "checkout"
 
     repo=Activefs::LocalRepo.open(ARGV[1])
-    path=File.join(Dir.pwd,ARGV[2]) || raise("path argument missing")
+    path=File.join(Dir.pwd, ARGV[2]) || raise("path argument missing")
     Activefs::Cmd::Checkout.run(repo, path)
 
+  when "status"
+    repo=Activefs::LocalRepo.open(ARGV[1])
+    path=File.join(Dir.pwd, ARGV[2]) || raise("path argument missing")
+    Activefs::Cmd::Status.run(repo, path)
   else
     puts "no command given"
 end
